@@ -29,13 +29,8 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false}} />
-        <Stack.Screen name="detail" options={{ 
-          headerShown: true,
-            headerTitle: 'Details', // This removes the title
-            headerBackTitle: "back", // This removes the back button text on iOS
-            headerBackButtonMenuEnabled: false // This removes the back button menu on Android/>
-        }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" />
       </Stack>
     </ThemeProvider>
   );
