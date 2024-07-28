@@ -138,3 +138,23 @@ export async function deleteLobbyById(lobbyId: string): Promise<void> {
         databaseLogger.info('Lobby deleted successfully for lobby:', lobbyId);
     }
 }
+
+
+export async function getPlayersByLobbyId(lobbyId: string): Promise<Player[] | null> {
+    try {
+      const lobbyRef = ref(database, `games/${lobbyId}/players`);
+      const snapshot = await get(lobbyRef);
+  
+      if (snapshot.exists()) {
+        const playersData = snapshot.val();
+        const players: Player[] = Object.values(playersData);
+        return players;
+      } else {
+        console.warn(`No players found for lobby ID: ${lobbyId}`);
+        return null;
+      }
+    } catch (error) {
+      console.error(`Error fetching players for lobby ID: ${lobbyId}`, error);
+      return null;
+    }
+  }

@@ -4,6 +4,7 @@ import { createGame, joinGame, deleteLobbyById } from './config/database';
 import { mainLogger } from './config/logger';
 import { Lobby } from './models/Lobby';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 const detailLogger = mainLogger.extend('Detail');
 
@@ -16,6 +17,7 @@ const DetailScreen: React.FC = () => {
   detailLogger.info('Detail screen loaded');
 
   const navigation = useNavigation();
+  const router = useRouter();
 
   const handleCreateGame = useCallback(async () => {
     if (!username.trim()) {
@@ -35,7 +37,11 @@ const DetailScreen: React.FC = () => {
           text: 'Join Game',
           onPress: async () => {
             await joinGame(lobbyId, username, true);
-            navigation.navigate('GameScreen', { code: lobbyId, user: username });
+            const data = [{ code: lobbyId, user: username, isHost: true }];
+            router.push({
+              pathname: '/gameScreen',
+              params: { data: JSON.stringify(data) },
+            });
           },
         },
         {
@@ -50,7 +56,7 @@ const DetailScreen: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [username]);
+  }, [username, lobbyCode, router]);
 
   const handleJoinGame = useCallback(async () => {
     if (!username.trim() || !lobbyCode.trim()) {
@@ -61,14 +67,18 @@ const DetailScreen: React.FC = () => {
     setIsLoading(true);
     try {
       await joinGame(lobbyCode, username);
-      navigation.navigate('GameScreen', { code: lobbyCode, user: username });
+      const data = [{ code: lobbyCode, user: username, isHost: false }];
+      router.push({
+        pathname: '/gameScreen',
+        params: { data: JSON.stringify(data) },
+      });
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to join game');
       detailLogger.error('Error joining game:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [username, lobbyCode]);
+  }, [username, lobbyCode, router]);
 
   return (
     <View style={styles.container}>
