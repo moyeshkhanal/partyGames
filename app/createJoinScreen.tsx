@@ -5,6 +5,7 @@ import { mainLogger } from './config/logger';
 import { Lobby } from './models/Lobby';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const detailLogger = mainLogger.extend('Detail');
 
@@ -81,8 +82,8 @@ const DetailScreen: React.FC = () => {
   }, [username, lobbyCode, router]);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Game Lobby</Text>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Join/Create Lobby</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter Username"
@@ -104,23 +105,23 @@ const DetailScreen: React.FC = () => {
         <Text style={styles.buttonText}>Join Game</Text>
       </TouchableOpacity>
      
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
     backgroundColor: '#f5f5f5',
+    top: 0,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
   },
   input: {
     width: '80%',

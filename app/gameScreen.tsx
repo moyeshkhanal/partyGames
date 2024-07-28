@@ -3,14 +3,9 @@ import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { mainLogger } from './config/logger';
 import { getPlayersByLobbyId } from './config/database';
+import { Player } from './models/Player';
 
 const gameLogger = mainLogger.extend('Game');
-
-interface Player {
-  player_id: string;
-  name: string;
-  score: number;
-}
 
 const GameScreen: React.FC = () => {
   const { data } = useLocalSearchParams();
@@ -55,13 +50,15 @@ const GameScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Game Screen</Text>
-      <Text>Lobby ID: {parsedData[0].code}</Text>
-      <Text>Username: {parsedData[0].user}</Text>
-      {parsedData[0].isHost && <Text>You are the host</Text>}
+      <View style={styles.topContainer}>
+        <Text style={styles.title}>Game Screen</Text>
+        <Text>Lobby ID: {parsedData[0].code}</Text>
+        <Text>Username: {parsedData[0].user}</Text>
+        {parsedData[0].isHost && <Text>You are the host</Text>}
+      </View>
 
       {players.length > 0 ? (
-        <View>
+        <View style={styles.listContainer}>
           <Text>Players in the lobby:</Text>
           <FlatList
             data={players}
@@ -79,21 +76,55 @@ const GameScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: 20,
     backgroundColor: '#f5f5f5',
+    paddingTop: 40, // Add some padding to the top
+  },
+  topContainer: {
+    alignItems: 'center',
+    marginBottom: 20, // Add some margin to separate from the list
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 20,
+  },
+  listContainer: {
+    width: '100%',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   item: {
     padding: 10,
     borderBottomColor: '#ccc',
     borderBottomWidth: 1,
+    width: '80%',
+  },
+  input: {
+    width: '80%',
+    height: 40,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 15,
+    color: 'black',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    paddingVertical: 15,
+    paddingHorizontal: 30,
+    borderRadius: 10,
+    marginBottom: 15,
+    alignItems: 'center',
+    width: '80%',
+  },
+  buttonText: {
+    fontSize: 18,
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });
 

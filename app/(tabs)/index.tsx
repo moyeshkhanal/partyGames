@@ -38,7 +38,7 @@ function CardGrid() {
   const handleCardPress = (cardData: string) => {
     homeLogger.info('Card pressed', cardData);
     router.push({
-      pathname: "/detail",
+      pathname: "/createJoinScreen",
       params: { cardData }
     });
   };

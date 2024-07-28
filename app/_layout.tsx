@@ -30,11 +30,11 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false}} />
-        <Stack.Screen name="detail" options={{ 
+        <Stack.Screen name="createJoinScreen" options={{ 
           headerShown: true,
-            headerTitle: 'Details', // This removes the title
+            headerTitle: 'Join Lobby', // This removes the title
             headerBackTitle: "back", // This removes the back button text on iOS
-            headerBackButtonMenuEnabled: false // This removes the back button menu on Android/>
+            headerBackButtonMenuEnabled: true // This removes the back button menu on Android/>
         }} />
         <Stack.Screen name="gameScreen" options={{ headerShown: false}}/>
       </Stack>
