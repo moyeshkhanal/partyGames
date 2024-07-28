@@ -18,7 +18,6 @@ export function decodePlayer(data: any): Player {
 export function encodeLobby(lobby: Lobby): any {
   return {
     ...lobby,
-    createdAt: lobby.createdAt.toISOString(),
     players: lobby.players.map(encodePlayer),
   };
 }
@@ -26,7 +25,6 @@ export function encodeLobby(lobby: Lobby): any {
 export function decodeLobby(data: any): Lobby {
   return {
     ...data,
-    createdAt: new Date(data.createdAt),
     players: data.players.map(decodePlayer),
   };
 }

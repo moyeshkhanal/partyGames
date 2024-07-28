@@ -1,3 +1,4 @@
+// DetailScreen.tsx
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
 import { createGame, joinGame, startGame } from './config/database';
@@ -14,6 +15,8 @@ const DetailScreen: React.FC = () => {
 
   detailLogger.info('Detail screen loaded');
 
+  const getNewLobby: Lobby = { name:'', lobbyId: '', players: [], createdAt: new Date().toISOString(), lobbyHostID: ''}; // initialize Lobby object
+
   const handleCreateGame = useCallback(async () => {
     if (!username.trim()) {
       Alert.alert('Error', 'Please enter a username');
@@ -22,10 +25,22 @@ const DetailScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const newLobby = await createGame(username);
+      const newLobby: Lobby = getNewLobby; // initialize Lobby object
+      const lobbyId = await createGame(newLobby);
       setCurrentLobby(newLobby);
-      setLobbyCode(newLobby.lobbyId);
-      Alert.alert('Success', `Game created successfully. Lobby code: ${newLobby.lobbyId}`);
+      setLobbyCode(lobbyId);
+      detailLogger.info('Game created with lobby ID:', lobbyId);
+      Alert.alert('Game Lobby Created', 'Lobby Code: '+ lobbyId, [
+        {
+          text: 'Join Game',
+          onPress: () => joinGame(lobbyId, username, true),
+        },
+        {
+          text: 'Delete Lobby',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ]);
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to create game');
       detailLogger.error('Error creating game:', error);
@@ -44,7 +59,6 @@ const DetailScreen: React.FC = () => {
     try {
       await joinGame(lobbyCode, username);
       Alert.alert('Success', 'Joined game successfully');
-      // You might want to fetch the updated lobby data here and set it to currentLobby
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to join game');
       detailLogger.error('Error joining game:', error);
@@ -63,7 +77,6 @@ const DetailScreen: React.FC = () => {
     try {
       await startGame(currentLobby.lobbyId);
       Alert.alert('Success', 'Game started successfully');
-      // You might want to navigate to a game screen or update the UI here
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to start game');
       detailLogger.error('Error starting game:', error);
@@ -111,12 +124,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#f5f5f5', // Light background color for better visibility
+    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333', // Darker color for the title
+    color: '#333',
     marginBottom: 20,
   },
   input: {
@@ -127,20 +140,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 15,
-    color: 'black', // Darker color for the input text
+    color: 'black',
   },
   button: {
-    backgroundColor: '#007bff', // Primary color for the button
+    backgroundColor: '#007bff',
     paddingVertical: 15,
     paddingHorizontal: 30,
     borderRadius: 10,
     marginBottom: 15,
     alignItems: 'center',
-    width: '80%', // Make buttons wider
+    width: '80%',
   },
   buttonText: {
     fontSize: 18,
-    color: '#fff', // White color for the button text
+    color: '#fff',
     fontWeight: 'bold',
   },
 });

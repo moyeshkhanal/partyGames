@@ -3,11 +3,11 @@ import { Player } from "./Player";
 interface Lobby {
     lobbyId: string;
     name: string;
-    createdAt: Date;
+    createdAt: string;
     lobbyHostID: string;
-    lobbyImposterID: string;
-    imposterMessage: string;
-    playerMessage: string;
+    lobbyImposterID?: string;
+    imposterMessage?: string;
+    playerMessage?: string;
     players: Player[];
   }
   
