@@ -10,5 +10,5 @@ function generateRandomId(length: number = 6): string {
     return result;
   }
   
- export {generateRandomId};
+ export { generateRandomId };
   

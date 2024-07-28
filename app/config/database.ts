@@ -1,5 +1,5 @@
 // database.ts
-import { ref, set, get, update } from 'firebase/database';
+import { ref, set, get, update, remove } from 'firebase/database';
 import { database } from './firebaseConfig';
 import { mainLogger } from './logger';
 import { generateRandomId } from './util';
@@ -50,15 +50,16 @@ export async function joinGame(lobbyId: string, username: string, isHost: boolea
             databaseLogger.error('Game not found. Please check the lobby code. lobbyId:', lobbyId);
             throw new Error('Game not found. Please check the lobby code.');
         }
-
+        databaseLogger.info('Game found. lobbyId:', lobbyId, "decoding lobby data...");
         const lobbyData: Lobby = decodeLobby(snapshot.val());
+        databaseLogger.info('Lobby data decoded. lobbyId:', lobbyData.lobbyId);
 
         if (lobbyData.players.length >= MAX_NUMBER_OF_PLAYERS) {
             databaseLogger.error('Lobby is full. Cannot join the game. lobbyId:', lobbyId);
             throw new Error('Lobby is full. Cannot join the game.');
         }
 
-        if (lobbyData.players.some(player => player.name === username)) {
+        if (lobbyData.players.some(player => player.name === username) && !isHost) {
             throw new Error('Username already taken in this lobby. Please choose a different name.');
         }
 
@@ -114,5 +115,26 @@ export async function startGame(lobbyId: string): Promise<void> {
     } catch (error: any) {
         databaseLogger.error('Error starting game:', error.message);
         throw error;
+    }
+}
+
+export async function deleteLobbyById(lobbyId: string): Promise<void> {
+    databaseLogger.info('Deleting lobby for lobby ID:', lobbyId);
+    const gameRef = ref(database, 'lobbies/' + lobbyId);
+    try {
+        const snapshot = await get(gameRef);
+
+        if (!snapshot.exists()) {
+            throw new Error('Game not found.');
+        }
+
+        const lobbyData: Lobby = decodeLobby(snapshot.val());
+        await remove(gameRef);
+        databaseLogger.info('Lobby deleted successfully for lobby:', lobbyId);
+    } catch (error: any) {
+        databaseLogger.error('Error deleting lobby:', error.message);
+        throw error;
+    }finally{
+        databaseLogger.info('Lobby deleted successfully for lobby:', lobbyId);
     }
 }

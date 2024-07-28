@@ -1,24 +1,19 @@
-// GameScreen.tsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { RouteProp } from '@react-navigation/native';
 
-type GameScreenRouteProp = RouteProp<{
-  GameScreen: { lobbyId: string; username: string };
-}, 'GameScreen'>;
+interface GameScreenProps {
+  route: RouteProp<{ params: { code: string; user: string } }, 'params'>;
+}
 
-type Props = {
-  route: GameScreenRouteProp;
-};
-
-const GameScreen: React.FC<Props> = ({ route }) => {
-  const { lobbyId, username } = route.params;
+const GameScreen: React.FC<GameScreenProps> = ({ route }) => {
+  const { code, user } = route.params;
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Game Screen</Text>
-      <Text>Lobby ID: {lobbyId}</Text>
-      <Text>Username: {username}</Text>
+      <Text>Lobby ID: {code}</Text>
+      <Text>Username: {user}</Text>
     </View>
   );
 };

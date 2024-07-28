@@ -25,6 +25,6 @@ export function encodeLobby(lobby: Lobby): any {
 export function decodeLobby(data: any): Lobby {
   return {
     ...data,
-    players: data.players.map(decodePlayer),
+    players: data.players ? data.players.map(decodePlayer) : [],
   };
 }

@@ -1,9 +1,9 @@
-// DetailScreen.tsx
 import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
-import { createGame, joinGame, startGame } from './config/database';
+import { createGame, joinGame, deleteLobbyById } from './config/database';
 import { mainLogger } from './config/logger';
 import { Lobby } from './models/Lobby';
+import { useNavigation } from '@react-navigation/native';
 
 const detailLogger = mainLogger.extend('Detail');
 
@@ -15,7 +15,7 @@ const DetailScreen: React.FC = () => {
 
   detailLogger.info('Detail screen loaded');
 
-  const getNewLobby: Lobby = { name:'', lobbyId: '', players: [], createdAt: new Date().toISOString(), lobbyHostID: ''}; // initialize Lobby object
+  const navigation = useNavigation();
 
   const handleCreateGame = useCallback(async () => {
     if (!username.trim()) {
@@ -25,19 +25,22 @@ const DetailScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const newLobby: Lobby = getNewLobby; // initialize Lobby object
+      const newLobby: Lobby = { name: username, lobbyId: '', players: [], createdAt: new Date().toISOString(), lobbyHostID: '' };
       const lobbyId = await createGame(newLobby);
       setCurrentLobby(newLobby);
       setLobbyCode(lobbyId);
       detailLogger.info('Game created with lobby ID:', lobbyId);
-      Alert.alert('Game Lobby Created', 'Lobby Code: '+ lobbyId, [
+      Alert.alert('Game Lobby Created', `Lobby Code: ${lobbyId}`, [
         {
           text: 'Join Game',
-          onPress: () => joinGame(lobbyId, username, true),
+          onPress: async () => {
+            await joinGame(lobbyId, username, true);
+            navigation.navigate('GameScreen', { code: lobbyId, user: username });
+          },
         },
         {
           text: 'Delete Lobby',
-          onPress: () => console.log('Cancel Pressed'),
+          onPress: () => deleteLobbyById(lobbyId),
           style: 'cancel',
         },
       ]);
@@ -58,7 +61,7 @@ const DetailScreen: React.FC = () => {
     setIsLoading(true);
     try {
       await joinGame(lobbyCode, username);
-      Alert.alert('Success', 'Joined game successfully');
+      navigation.navigate('GameScreen', { code: lobbyCode, user: username });
     } catch (error: any) {
       Alert.alert('Error', error.message || 'Failed to join game');
       detailLogger.error('Error joining game:', error);
@@ -66,24 +69,6 @@ const DetailScreen: React.FC = () => {
       setIsLoading(false);
     }
   }, [username, lobbyCode]);
-
-  const handleStartGame = useCallback(async () => {
-    if (!currentLobby) {
-      Alert.alert('Error', 'No active lobby');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await startGame(currentLobby.lobbyId);
-      Alert.alert('Success', 'Game started successfully');
-    } catch (error: any) {
-      Alert.alert('Error', error.message || 'Failed to start game');
-      detailLogger.error('Error starting game:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentLobby]);
 
   return (
     <View style={styles.container}>
@@ -108,12 +93,7 @@ const DetailScreen: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleJoinGame} disabled={isLoading}>
         <Text style={styles.buttonText}>Join Game</Text>
       </TouchableOpacity>
-      {currentLobby && (
-        <TouchableOpacity style={styles.button} onPress={handleStartGame} disabled={isLoading}>
-          <Text style={styles.buttonText}>Start Game</Text>
-        </TouchableOpacity>
-      )}
-      {isLoading && <ActivityIndicator size="large" color="#007bff" />}
+     
     </View>
   );
 };

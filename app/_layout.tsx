@@ -36,7 +36,7 @@ export default function RootLayout() {
             headerBackTitle: "back", // This removes the back button text on iOS
             headerBackButtonMenuEnabled: false // This removes the back button menu on Android/>
         }} />
-        <Stack.Screen name="gameScreen" options={{ headerShown: false}} />
+        <Stack.Screen name="gameScreen" options={{ headerShown: false}}/>
       </Stack>
     </ThemeProvider>
   );

@@ -30,16 +30,6 @@ const cardData = [
     name: "Card One",
     description: "This is a brief description of Card One."
   },
-  {
-    id: 2,
-    name: "Card Two",
-    description: "Here's a short description for Card Two."
-  },
-  {
-    id: 3,
-    name: "Card Three",
-    description: "Card Three comes with this concise description."
-  }
 ];
 
 function CardGrid() {
@@ -56,13 +46,7 @@ function CardGrid() {
   return (
     <View style={styles.cardContainer}>
       <TouchableOpacity style={styles.card} onPress={() => handleCardPress('Card 1 Data')}>
-        <Text style={styles.cardText}>Test 1</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => handleCardPress('Card 2 Data')}>
-        <Text style={styles.cardText}>Test 2</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.card} onPress={() => handleCardPress('Card 3 Data')}>
-        <Text style={styles.cardText}>Test 3</Text>
+        <Text style={styles.cardText}>Who-Is-It?</Text>
       </TouchableOpacity>
     </View>
   );
