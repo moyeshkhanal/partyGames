@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator } from 'react-native';
-import { createGame, joinGame, deleteLobbyById } from './config/database';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
+import { createLobby, joinGame, deleteLobbyById } from './config/database';
 import { mainLogger } from './config/logger';
 import { Lobby } from './models/Lobby';
 import { useNavigation } from '@react-navigation/native';
@@ -28,8 +28,8 @@ const DetailScreen: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const newLobby: Lobby = { name: username, lobbyId: '', players: [], createdAt: new Date().toISOString(), lobbyHostID: '' };
-      const lobbyId = await createGame(newLobby);
+      const newLobby: Lobby = { name: username, lobbyId: '', players: [], createdAt: new Date().toISOString(), lobbyHostID: "" };
+      const lobbyId = await createLobby(newLobby);
       setCurrentLobby(newLobby);
       setLobbyCode(lobbyId);
       detailLogger.info('Game created with lobby ID:', lobbyId);
@@ -82,8 +82,12 @@ const DetailScreen: React.FC = () => {
   }, [username, lobbyCode, router]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Join/Create Lobby</Text>
+    <SafeAreaView>
+      <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <Text style={styles.title}>Who-Is-It?</Text>
       <TextInput
         style={styles.input}
         placeholder="Enter Username"
@@ -104,7 +108,7 @@ const DetailScreen: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleJoinGame} disabled={isLoading}>
         <Text style={styles.buttonText}>Join Game</Text>
       </TouchableOpacity>
-     
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 };
@@ -114,14 +118,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'column',
     justifyContent: 'center',
+    alignContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    top: 0,
+    position: 'absolute',
+    width: '100%',
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#fff',
   },
   input: {
     width: '80%',
@@ -131,7 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 15,
-    color: 'black',
+    color: 'white',
   },
   button: {
     backgroundColor: '#007bff',
