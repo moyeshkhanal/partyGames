@@ -11,7 +11,7 @@ import { encodeLobby, decodeLobby, encodePlayer } from '../models/serializers';
 import { MAX_NUMBER_OF_PLAYERS } from '@/constants/Variable';
 const databaseLogger = mainLogger.extend('Database');
 
-export async function createGame(lobbyData: Lobby): Promise<string> {
+export async function createLobby(lobbyData: Lobby): Promise<string> {
     return new Promise(async (resolve, reject) => {
       databaseLogger.info('Creating game with data:', lobbyData);
   
@@ -59,12 +59,12 @@ export async function joinGame(lobbyId: string, username: string, isHost: boolea
             throw new Error('Lobby is full. Cannot join the game.');
         }
 
-        if (lobbyData.players.some(player => player.name === username) && !isHost) {
-            throw new Error('Username already taken in this lobby. Please choose a different name.');
-        }
+        // TODO: Uncomment this code to prevent duplicate usernames in the lobby (MAYBE???)
+        // if (lobbyData.players.some(player => player.name === username) && !isHost) {
+        //     throw new Error('Username already taken in this lobby. Please choose a different name.');
+        // }
 
         const newPlayer: Player = {
-
             playerId: uuidv4(),
             name: username,
             createdAt: new Date().toISOString(),
@@ -72,12 +72,16 @@ export async function joinGame(lobbyId: string, username: string, isHost: boolea
         };
 
         if (isHost) {
+            databaseLogger.info('Setting lobby host ID:', newPlayer.playerId);
             lobbyData.lobbyHostID = newPlayer.playerId;
         }
 
         lobbyData.players.push(newPlayer);
 
-        await update(gameRef, { players: lobbyData.players.map(encodePlayer) });
+        await update(gameRef, { 
+          players: lobbyData.players.map(encodePlayer),
+          lobbyHostID: lobbyData.lobbyHostID
+        });
         databaseLogger.info('Joined game successfully with username:', username, "and lobby ID:", lobbyId);
     } catch (error: any) {
         databaseLogger.error('Error joining game:', error.message);
@@ -142,12 +146,13 @@ export async function deleteLobbyById(lobbyId: string): Promise<void> {
 
 export async function getPlayersByLobbyId(lobbyId: string): Promise<Player[] | null> {
     try {
-      const lobbyRef = ref(database, `games/${lobbyId}/players`);
+      const lobbyRef = ref(database, `lobbies/${lobbyId}/players`);
       const snapshot = await get(lobbyRef);
   
       if (snapshot.exists()) {
         const playersData = snapshot.val();
         const players: Player[] = Object.values(playersData);
+        databaseLogger.info('Players retrieved for lobby ID:', lobbyId, "Players: ", players.length);
         return players;
       } else {
         console.warn(`No players found for lobby ID: ${lobbyId}`);

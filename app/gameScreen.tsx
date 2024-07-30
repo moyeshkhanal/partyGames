@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, FlatList } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { mainLogger } from './config/logger';
 import { getPlayersByLobbyId } from './config/database';
@@ -10,14 +10,6 @@ const gameLogger = mainLogger.extend('Game');
 const GameScreen: React.FC = () => {
   const { data } = useLocalSearchParams();
   const parsedData = JSON.parse(data as string);
-  gameLogger.info(
-    'Game screen loaded for player:',
-    parsedData[0].user,
-    'lobby ID:',
-    parsedData[0].code,
-    'isHost:',
-    parsedData[0].isHost
-  );
   const lobbyId = parsedData[0].code;
   const [players, setPlayers] = useState<Player[]>([]);
 
@@ -26,7 +18,7 @@ const GameScreen: React.FC = () => {
       gameLogger.info('Getting players for lobby:', lobbyId);
       try {
         const playersList = await getPlayersByLobbyId(lobbyId);
-        if (playersList.length > 0) {
+        if (playersList !== null) {
           setPlayers(playersList);
           gameLogger.info('Players retrieved:', playersList);
         } else {
@@ -44,87 +36,125 @@ const GameScreen: React.FC = () => {
 
   const renderItem = ({ item }: { item: Player }) => (
     <View style={styles.item}>
-      <Text>{item.name}: {item.score}</Text>
+      <Text style={styles.playerName}>{item.name} {parsedData[0].isHost && <Text style={styles.hostBadge}>Host</Text>}</Text>
+      <Text style={styles.playerScore}>{item.score}</Text>
     </View>
   );
 
   return (
-    <View style={styles.container}>
-      <View style={styles.topContainer}>
-        <Text style={styles.title}>Game Screen</Text>
-        <Text>Lobby ID: {parsedData[0].code}</Text>
-        <Text>Username: {parsedData[0].user}</Text>
-        {parsedData[0].isHost && <Text>You are the host</Text>}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Game Room</Text>
+        <Text style={styles.subtitle}>Lobby ID: {parsedData[0].code}</Text>
       </View>
 
-      {players.length > 0 ? (
-        <View style={styles.listContainer}>
-          <Text>Players in the lobby:</Text>
+      <View style={styles.userInfo}>
+        <Text style={styles.username}>{parsedData[0].user}</Text>
+        {parsedData[0].isHost && <Text style={styles.hostBadge}>Host</Text>}
+      </View>
+
+      <View style={styles.listContainer}>
+        <Text style={styles.listTitle}>Players</Text>
+        {players.length > 0 ? (
           <FlatList
             data={players}
             renderItem={renderItem}
-            keyExtractor={(item) => item.player_id}
+            keyExtractor={(item) => item.playerId}
+            contentContainerStyle={styles.list}
           />
-        </View>
-      ) : (
-        <Text>No players found.</Text>
-      )}
-    </View>
+        ) : (
+          <Text style={styles.noPlayersText}>No players found.</Text>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
-    paddingTop: 40, // Add some padding to the top
+    backgroundColor: '#f0f0f0',
   },
-  topContainer: {
+  header: {
+    backgroundColor: '#4a90e2',
+    padding: 20,
     alignItems: 'center',
-    marginBottom: 20, // Add some margin to separate from the list
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#ffffff',
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#ffffff',
+    marginTop: 5,
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 15,
+    backgroundColor: '#ffffff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  username: {
+    fontSize: 18,
+    fontWeight: '600',
     color: '#333',
   },
+  hostBadge: {
+    marginLeft: 10,
+    padding: 8,
+    backgroundColor: '#4caf50',
+    color: '#ffffff',
+    borderRadius: 12,
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   listContainer: {
-    width: '100%',
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    padding: 20,
+  },
+  listTitle: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 10,
+  },
+  list: {
+    flexGrow: 1,
   },
   item: {
-    padding: 10,
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    width: '80%',
-  },
-  input: {
-    width: '80%',
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 15,
-    color: 'black',
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 30,
-    borderRadius: 10,
-    marginBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    width: '80%',
+    backgroundColor: '#ffffff',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 10,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
   },
-  buttonText: {
-    fontSize: 18,
-    color: '#fff',
-    fontWeight: 'bold',
+  playerName: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  playerScore: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#4a90e2',
+  },
+  noPlayersText: {
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginTop: 20,
   },
 });
 
